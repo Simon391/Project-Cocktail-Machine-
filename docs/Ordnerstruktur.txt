@@ -1,0 +1,49 @@
+Cocktail_Maschine/
+├── docs/
+│   ├── Ordnerstruktur.txt
+│   ├── Projektskizze.pdf
+│   ├── UML_Diagramme/
+│   │   └── PicoW_UML.png
+│   │   └── Pc_UML.png
+│   └── Blockdiagramme/
+│       └── Sensoren_Aktoren_Diagramm.png
+├── src/
+│   ├── pc/                        # Verantwortung: Simon Weng
+│   │   ├── main.py                # 🏁 Hauptdatei (startet GUI, koordiniert Module)
+│   │   ├── gui/
+│   │   │   ├── __init__.py        # GUI-Paket (Tkinter/PyQt)
+│   │   │   ├── app.py             # Haupt-GUI-Klasse
+│   │   │   └── sorting_logic.py   # Bubble/Insertion-Sort für Zutatenlisten
+│   │   ├── recipe_editor/
+│   │   │   ├── __init__.py
+│   │   │   └── editor.py          # Undo/Redo mit Stack
+│   │   └── csv_handler/
+│   │       ├── __init__.py
+│   │       └── csv_manager.py     # CSV-Lese-/Schreiblogik
+│   ├── pico_w/                    # Verantwortung: Simon Schulz
+│   │   ├── firmware/
+│   │   │   └── main.py            # MicroPython/C++-Code (Pumpensteuerung)
+│   │   ├── pump_control/
+│   │   │   └── queue_handler.py   # Queue-Implementierung
+│   │   └── sensors/
+│   │       └── sensor_driver.py   # Sensoren-Integration
+│   ├── algorithms/                # Verantwortung: Tobias Swaczyna
+│   │   ├── __init__.py
+│   │   ├── search.py              # Binäre Suche
+│   │   ├── sorting.py             # Quick-Sort, Bubble-Sort, Insertion-Sort
+│   │   └── data_structures.py     # HashTable, Binärbaum, Verkettete Liste
+│   └── communication/
+│       ├── __init__.py
+│       └── serial_handler.py      # USB/Serial-Kommunikation PC ↔ Pico
+├── data/
+│   ├── recipes.csv                # Rezeptdatenbank (sortiert)
+│   ├── ingredients.csv            # Zutateneigenschaften
+│   └── backups/                   # CSV-Sicherungen
+├── hardware/
+│   └── pico_w/
+│       ├── schaltplan.pdf         # Schaltplan
+│       └── pin_belegung.txt       # Pin-Belegung
+├── libs/                          # Externe Bibliotheken (z.B. PySerial)
+├── README.md                      # Setup, CSV-Format, Hardware-Anleitung
+├── LICENSE
+└── requirements.txt               # Abhängigkeiten (Python, pyserial) in C:\Hochschule\MeKa\2.Semester\Projekt Cocktailmaschine powerschel command
