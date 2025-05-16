@@ -14,12 +14,7 @@ Cocktail_Maschine/
 │   │   │   ├── __init__.py        # GUI-Paket (Tkinter/PyQt)
 │   │   │   ├── app.py             # Haupt-GUI-Klasse
 │   │   │   └── sorting_logic.py   # Bubble/Insertion-Sort für Zutatenlisten
-│   │   ├── recipe_editor/
-│   │   │   ├── __init__.py
-│   │   │   └── editor.py          # Undo/Redo mit Stack
-│   │   └── csv_handler/
-│   │       ├── __init__.py
-│   │       └── csv_manager.py     # CSV-Lese-/Schreiblogik
+│   │   │
 │   ├── pico_w/                    # Verantwortung: Simon Schulz
 │   │   ├── firmware/
 │   │   │   └── main.py            # MicroPython/C++-Code (Pumpensteuerung)
