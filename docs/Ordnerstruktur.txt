@@ -30,10 +30,6 @@ Cocktail_Maschine/
 │   └── communication/
 │       ├── __init__.py
 │       └── serial_handler.py      # USB/Serial-Kommunikation PC ↔ Pico
-├── data/
-│   ├── recipes.csv                # Rezeptdatenbank (sortiert)
-│   ├── ingredients.csv            # Zutateneigenschaften
-│   └── backups/                   # CSV-Sicherungen
 ├── hardware/
 │   └── pico_w/
 │       ├── schaltplan.pdf         # Schaltplan
