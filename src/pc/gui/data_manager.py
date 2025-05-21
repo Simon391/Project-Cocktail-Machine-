@@ -13,34 +13,35 @@ class CocktailDataManager:
     def load_sample_data(self):
         """Load sample cocktail data with popularity scores and prices"""
         self.cocktails = {
-            "Margarita": {
-                "Ingredients": {"Tequila": "50", "Triple Sec": "20", "Lime Juice": "30", "Salt Rim": "--"},
-                "Notes": "Rim glass with salt",
+            "Rum & Cola Classic": {
+                "Ingredients": {"Rum": "50", "Cola": "100", "Lime Juice": "10", "Ice": "--"},
+                "Notes": "Mit Limettenscheibe garnieren",
                 "Category": "Classic"
             },
-            "Mojito": {
-                "Ingredients": {"Rum": "50", "Mint": "5", "Lime": "1", "Soda": "100"},
-                "Notes": "Garnish with mint and lime",
-                "Category": "Classic"
-            },
-            "Cosmopolitan": {
-                "Ingredients": {"Vodka": "40", "Triple Sec": "15", "Cranberry Juice": "30", "Lime Juice": "15"},
-                "Notes": "Serve in a chilled martini glass",
+            "Vodka Tonic Breeze": {
+                "Ingredients": {"Vodka": "40", "Tonic Water": "100", "Lime": "1", "Ice": "--"},
+                "Notes": "Eiswürfel hinzufügen und gut umrühren",
                 "Category": "Modern"
+            },
+            "Fusion Fizz": {
+                "Ingredients": {"Rum": "30", "Vodka": "30", "Cola": "80", "Tonic Water": "20"},
+                "Notes": "Mit Minzblatt garnieren",
+                "Category": "Creative"
             }
         }
 
         self.popularity_scores = {
-            "Margarita": 8,
-            "Mojito": 9,
-            "Cosmopolitan": 7
+            "Rum & Cola Classic": 9,
+            "Vodka Tonic Breeze": 8,
+            "Fusion Fizz": 7
         }
 
         self.prices = {
-            "Margarita": 12,
-            "Mojito": 10,
-            "Cosmopolitan": 14
+            "Rum & Cola Classic": 10,
+            "Vodka Tonic Breeze": 12,
+            "Fusion Fizz": 11
         }
+
 
     def update_popularity_scores(self, scores):
         """Update popularity scores"""

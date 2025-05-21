@@ -322,7 +322,7 @@ class App(ttk.Frame):
         container.rowconfigure(0, weight=1)
         container.columnconfigure(0, weight=1)
 
-        self.serial_manager = SerialManager()  # <-- nur 1x erzeugen
+        self.serial_manager = SerialManager() 
 
         self.pages = {
             "Main": MainPage(container, self.data_manager, self.serial_manager),
