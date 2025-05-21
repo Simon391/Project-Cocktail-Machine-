@@ -10,63 +10,63 @@ class CocktailDataManager:
         self.load_sample_data()
         self.sort_data()
 
-        def load_sample_data(self):
-            """Load sample cocktail data with popularity scores and prices"""
-            self.cocktails = {
-                "Dark & Stormy Twist": {
-                    "Ingredients": {"Rum": "50", "Cola": "100", "Tonic Water": "20", "Lime Juice": "10"},
-                    "Notes": "Mit Limettenscheibe garnieren",
-                    "Category": "Classic"
-                },
-                "Vodka Tonic Cola": {
-                    "Ingredients": {"Vodka": "40", "Tonic Water": "100", "Cola": "60", "Lemon Juice": "10"},
-                    "Notes": "Eiskalt servieren",
-                    "Category": "Classic"
-                },
-                "Rum & Vodka Fusion": {
-                    "Ingredients": {"Rum": "30", "Vodka": "30", "Cola": "80", "Tonic Water": "20"},
-                    "Notes": "Mit Minzblatt garnieren",
-                    "Category": "Creative"
-                },
-                "Cola Tonic Highball": {
-                    "Ingredients": {"Cola": "100", "Tonic Water": "50", "Rum": "40"},
-                    "Notes": "Mit Zitronenscheibe garnieren",
-                    "Category": "Highball"
-                },
-                "Vodka Cola Spritz": {
-                    "Ingredients": {"Vodka": "40", "Cola": "80", "Tonic Water": "20"},
-                    "Notes": "Mit Limettenscheibe servieren",
-                    "Category": "Refreshing"
-                },
-                "Tonic Rum Cooler": {
-                    "Ingredients": {"Rum": "50", "Tonic Water": "100"},
-                    "Notes": "Eiswürfel hinzufügen",
-                    "Category": "Classic"
-                },
-                "Cola Vodka Breeze": {
-                    "Ingredients": {"Cola": "80", "Vodka": "40", "Lemon Juice": "10"},
-                    "Notes": "Mit Zitronenscheibe servieren",
-                    "Category": "Citrus"
-                },
-                "Tonic Cola Punch": {
-                    "Ingredients": {"Tonic Water": "50", "Cola": "80", "Rum": "40", "Vodka": "30"},
-                    "Notes": "Mit Orangenzeste garnieren",
-                    "Category": "Party"
-                },
-                "Rum & Cola Classic": {
-                    "Ingredients": {"Rum": "50", "Cola": "100", "Lime Juice": "10"},
-                    "Notes": "Mit Limettenscheibe servieren",
-                    "Category": "Classic"
-                },
-                "Vodka Tonic Delight": {
-                    "Ingredients": {"Vodka": "40", "Tonic Water": "100", "Mint": "2"},
-                    "Notes": "Mit Minzblatt garnieren",
-                    "Category": "Fresh"
-                }
+    def load_sample_data(self):
+        """Load sample cocktail data with popularity scores and prices"""
+        self.cocktails = {
+            "Dark & Stormy Twist": {
+                "Ingredients": {"Rum": "50", "Cola": "100", "Tonic Water": "20", "Lime Juice": "10"},
+                "Notes": "Mit Limettenscheibe garnieren",
+                "Category": "Classic"
+            },
+            "Vodka Tonic Cola": {
+                "Ingredients": {"Vodka": "40", "Tonic Water": "100", "Cola": "60", "Lemon Juice": "10"},
+                "Notes": "Eiskalt servieren",
+                "Category": "Classic"
+            },
+            "Rum & Vodka Fusion": {
+                "Ingredients": {"Rum": "30", "Vodka": "30", "Cola": "80", "Tonic Water": "20"},
+                "Notes": "Mit Minzblatt garnieren",
+                "Category": "Creative"
+            },
+            "Cola Tonic Highball": {
+                "Ingredients": {"Cola": "100", "Tonic Water": "50", "Rum": "40"},
+                "Notes": "Mit Zitronenscheibe garnieren",
+                "Category": "Highball"
+            },
+            "Vodka Cola Spritz": {
+                "Ingredients": {"Vodka": "40", "Cola": "80", "Tonic Water": "20"},
+                "Notes": "Mit Limettenscheibe servieren",
+                "Category": "Refreshing"
+            },
+            "Tonic Rum Cooler": {
+                "Ingredients": {"Rum": "50", "Tonic Water": "100"},
+                "Notes": "Eiswürfel hinzufügen",
+                "Category": "Classic"
+            },
+            "Cola Vodka Breeze": {
+                "Ingredients": {"Cola": "80", "Vodka": "40", "Lemon Juice": "10"},
+                "Notes": "Mit Zitronenscheibe servieren",
+                "Category": "Citrus"
+            },
+            "Tonic Cola Punch": {
+                "Ingredients": {"Tonic Water": "50", "Cola": "80", "Rum": "40", "Vodka": "30"},
+                "Notes": "Mit Orangenzeste garnieren",
+                "Category": "Party"
+            },
+            "Rum & Cola Classic": {
+                "Ingredients": {"Rum": "50", "Cola": "100", "Lime Juice": "10"},
+                "Notes": "Mit Limettenscheibe servieren",
+                "Category": "Classic"
+            },
+            "Vodka Tonic Delight": {
+                "Ingredients": {"Vodka": "40", "Tonic Water": "100", "Mint": "2"},
+                "Notes": "Mit Minzblatt garnieren",
+                "Category": "Fresh"
             }
+        }
 
-    self.popularity_scores = {cocktail: 7 + index % 3 for index, cocktail in enumerate(self.cocktails.keys())}
-    self.prices = {cocktail: 8 + index % 5 for index, cocktail in enumerate(self.cocktails.keys())}
+        self.popularity_scores = {cocktail: 7 + index % 3 for index, cocktail in enumerate(self.cocktails.keys())}
+        self.prices = {cocktail: 8 + index % 5 for index, cocktail in enumerate(self.cocktails.keys())}
 
 
     def update_popularity_scores(self, scores):
