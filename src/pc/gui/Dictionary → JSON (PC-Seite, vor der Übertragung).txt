@@ -1,0 +1,20 @@
+import json
+
+# Minimales Befehl-Dictionary
+cocktail_cmd = {
+    "command": "prepare",          # Festgelegter Befehlstyp
+    "recipe": "Margarita",         # Rezeptname
+    "ingredients": {               # Flüssige Zutaten mit ml-Angaben
+        "Tequila": 50,
+        "Triple Sec": 20,
+        "Lime Juice": 30
+    }
+}
+
+# Transformation zu JSON
+json_str = json.dumps(cocktail_cmd)
+print("JSON zum Senden:\n", json_str)
+
+# Ausgabe zu Pico 
+
+{"command": "prepare", "recipe": "Margarita", "ingredients": {"Tequila": 50, "Triple Sec": 20, "Lime Juice": 30}}
