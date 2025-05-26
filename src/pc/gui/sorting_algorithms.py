@@ -36,15 +36,13 @@ def merge(left, right):
     return result
 
 class Bubble_Sort:
-        def __init__(self, zutaten):
+    def __init__(self, zutaten):
         self.zutaten = zutaten
 
     def bubble_sort(self):
-      
         n = len(self.zutaten)
         for i in range(n):
             for j in range(0, n - i - 1):
-                if self.zutaten[j] > self.zutaten[j + 1]:
+                if self.zutaten[j].lower() > self.zutaten[j + 1].lower():
                     self.zutaten[j], self.zutaten[j + 1] = self.zutaten[j+1], self.zutaten[j]
-        return self.zutaten
 

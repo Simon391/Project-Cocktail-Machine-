@@ -1,4 +1,5 @@
-from sorting_algorithms import quicksort, merge_sort
+from sorting_algorithms import quicksort, merge_sort, Bubble_Sort
+
 
 class CocktailDataManager:
     def __init__(self):
@@ -74,7 +75,7 @@ class CocktailDataManager:
     def update_popularity_scores(self, scores):
         """Update popularity scores"""
         self.popularity_scores.update(scores)
-        self.sort_data()
+        self.sort_data ()
 
     def update_prices(self, prices):
         """Update prices"""
@@ -133,3 +134,4 @@ class CocktailDataManager:
             }
             for name, data in self.cocktails.items()
         }
+    
