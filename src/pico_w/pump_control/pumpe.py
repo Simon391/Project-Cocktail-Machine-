@@ -3,21 +3,18 @@ import board
 
 class MultiPumpController:
     def __init__(self, pump_pins, ml_to_sec_map):
-        """
-        pump_pins: dict {'zutat': Pin-Objekt (z. B. board.GP18)}
-        ml_to_sec_map: dict {'zutat': sekunden_pro_ml (z. B. 0.5)}
-        """
+
         self.pumps = {}
         self.ml_to_sec = ml_to_sec_map
 
         for ingredient, pin in pump_pins.items():
             p = digitalio.DigitalInOut(pin)
             p.direction = digitalio.Direction.OUTPUT
-            p.value = True  # HIGH = AUS
+            p.value = True  # True = AUS
             self.pumps[ingredient] = p
 
     def start_pump(self, ingredient):
-        """Aktiviert die Pumpe (LOW = EIN)."""
+        """Aktiviert die Pumpe (False = EIN)."""
         pump = self.pumps.get(ingredient)
         if pump:
             pump.value = False
@@ -26,7 +23,7 @@ class MultiPumpController:
             print(f"Pumpe {ingredient} nicht gefunden")
 
     def stop_pump(self, ingredient):
-        """Deaktiviert die Pumpe (HIGH = AUS)."""
+        """Deaktiviert die Pumpe (True = AUS)."""
         pump = self.pumps.get(ingredient)
         if pump:
             pump.value = True
@@ -43,6 +40,7 @@ class MultiPumpController:
         if faktor:
             return menge_ml * faktor
         else:
-            print(f"Keine Kalibrierung für {ingredient}, Standardwert 1s/ml verwendet")
-            return menge_ml  # default: 1s pro ml
+            print(f"Keine Kalibrierung für {ingredient}, Standardwert 0,1s/ml verwendet")
+            return menge_ml  # default: 0,1s pro ml
+
 

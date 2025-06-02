@@ -4,10 +4,13 @@ from protocol import PicoSerialProtocol
 from pumpe import MultiPumpController
 from waage import HX711
 
+# Hauptklasse zur Steuerung des gesamten Systems
 class PumpenManager:
     def __init__(self):
+        # Initialisiere die serielle Kommunikation mit dem Host (z. B. PC)
         self.proto = PicoSerialProtocol()
 
+        # Konfiguration der Pumpen und ihrer zugehörigen GPIO-Pins
         pump_pins = {
             "Rum": board.GP18,
             "Vodka": board.GP19,
@@ -15,6 +18,7 @@ class PumpenManager:
             "Tonic Water": board.GP21
         }
 
+        # Umrechnungsfaktor: wie viele Sekunden braucht eine Pumpe für 1 ml Flüssigkeit?
         ml_to_sec = {
             "Rum": 0.078,
             "Vodka": 0.077,
@@ -22,13 +26,20 @@ class PumpenManager:
             "Tonic Water": 0.08
         }
 
+        # Initialisiere den Pumpen-Controller
         self.pump_controller = MultiPumpController(pump_pins, ml_to_sec)
 
+        # Initialisiere die Waage
         self.waage = HX711(board.GP2, board.GP3)
         self.waage.set_scale(960)
         print("Tare Waage...")
         self.waage.tare()
+        
+        # Heartbeat
+        self.last_heartbeat = time.time()
+        self.heartbeat_interval = 2.0
 
+        # Zustände
         self.rezept_queue = []
         self.current_rezept = []
         self.current_task = None
@@ -58,7 +69,6 @@ class PumpenManager:
             time.sleep(0.2)
 
     def get_stable_weight(self, samples=3, delay=0.01, max_jump=100.0):
-        """Lese Gewicht mehrfach, verwerfe Ausreißer über 100g Unterschied."""
         readings = []
         last_valid = None
 
@@ -103,7 +113,6 @@ class PumpenManager:
                 })
 
             if tasks:
-                # Glas steht evtl. schon da
                 gewicht = self.get_stable_weight()
                 if gewicht >= 20:
                     self.rezept_start_gewicht = gewicht
@@ -133,6 +142,7 @@ class PumpenManager:
         if not self.current_task and not self.current_rezept and self.rezept_queue:
             if self.rezept_start_gewicht is None:
                 self.wait_for_glas()
+
             rezept = self.rezept_queue.pop(0)
             self.current_rezept = rezept["tasks"]
             self.current_rezept_name = rezept.get("name", "Unbekannt")
@@ -190,6 +200,15 @@ class PumpenManager:
                 self.finished_sent = True
                 self.wait_for_glas_entfernt()
 
+    def send_heartbeat(self):
+        now = time.time()
+        if now - self.last_heartbeat >= self.heartbeat_interval:
+            self.proto.send_response({
+                "status": "heartbeat",
+                "timestamp": now
+            })
+            self.last_heartbeat = now
+
     def loop(self):
         print("Starte Hauptschleife...")
         while True:
@@ -197,8 +216,12 @@ class PumpenManager:
             if msg:
                 self.process_message(msg)
             self.update()
+            self.send_heartbeat()
             time.sleep(0.05)
 
+
+# Starte das System, wenn direkt ausgeführt
 if __name__ == "__main__":
     manager = PumpenManager()
     manager.loop()
+

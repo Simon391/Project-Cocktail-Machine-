@@ -33,3 +33,4 @@ class PicoSerialProtocol:
         """
         msg_json = json.dumps(msg_dict) + "\n"
         self.serial.write(msg_json.encode())
+
