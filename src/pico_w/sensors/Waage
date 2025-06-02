@@ -1,0 +1,83 @@
+# waage.py
+
+import time
+import board
+import digitalio
+
+class HX711:
+    def __init__(self, dout_pin, sck_pin, gain=128):
+        self.dout = digitalio.DigitalInOut(dout_pin)
+        self.dout.direction = digitalio.Direction.INPUT
+
+        self.sck = digitalio.DigitalInOut(sck_pin)
+        self.sck.direction = digitalio.Direction.OUTPUT
+
+        self.GAIN = 0
+        self.OFFSET = 0
+        self.SCALE = 1
+
+        self.set_gain(gain)
+
+    def set_gain(self, gain):
+        if gain == 128:
+            self.GAIN = 1
+        elif gain == 64:
+            self.GAIN = 3
+        elif gain == 32:
+            self.GAIN = 2
+        else:
+            raise ValueError('Gain muss 128, 64 oder 32 sein')
+        self.read_raw()
+
+    def is_ready(self):
+        return self.dout.value == False
+
+    def read_raw(self):
+        while not self.is_ready():
+            pass
+
+        count = 0
+        for _ in range(24):
+            self.sck.value = True
+            count = count << 1
+            self.sck.value = False
+            if self.dout.value:
+                count += 1
+
+        for _ in range(self.GAIN):
+            self.sck.value = True
+            self.sck.value = False
+
+        if count & 0x800000:
+            count |= ~0xffffff
+
+        return count
+
+    def read_average(self, times=10):
+        total = 0
+        for _ in range(times):
+            total += self.read_raw()
+        return total // times
+
+    def tare(self, times=15):
+        self.OFFSET = self.read_average(times)
+
+    def get_units(self, times=5):
+        raw_value = self.read_average(times) - self.OFFSET
+        return raw_value / self.SCALE
+
+    def set_scale(self, scale):
+        self.SCALE = scale
+
+
+# Beispielnutzung (wird nur beim Direktstart ausgeführt, zum testen)
+if __name__ == "__main__":
+    hx = HX711(board.GP2, board.GP3)
+    hx.set_scale(825.09)  # Anpassen
+    print("Tare...")
+    hx.tare()
+    while True:
+        gewicht = hx.get_units()
+        print(f"{int(gewicht)} g")
+        time.sleep(1)
+
