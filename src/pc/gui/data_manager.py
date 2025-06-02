@@ -1,4 +1,4 @@
-from sorting_algorithms import quicksort, merge_sort, Bubble_Sort
+from sorting_algorithms import QuickSort,BubbleSort
 
 
 class CocktailDataManager:
@@ -7,7 +7,8 @@ class CocktailDataManager:
         self.popularity_scores = {}
         self.prices = {}
         self.sorted_cocktails = []
-        self.current_sort_method = quicksort
+        self.quicksort =  QuickSort([])
+        self.bubbelsort = BubbleSort ([])
         self.load_sample_data()
         self.sort_data()
 
@@ -65,8 +66,7 @@ class CocktailDataManager:
                 "Category": "Fresh"
             }
         }
-        #sdsdsd
-        
+    
 
         self.popularity_scores = {cocktail: 7 + index % 3 for index, cocktail in enumerate(self.cocktails.keys())}
         self.prices = {cocktail: 8 + index % 5 for index, cocktail in enumerate(self.cocktails.keys())}
@@ -96,7 +96,10 @@ class CocktailDataManager:
     def sort_data(self, criteria="Name", order="Aufsteigend"):
         """Sort data by different criteria"""
         if criteria == "Name":
-            sorted_data = self.current_sort_method(list(self.cocktails.keys()))
+            #self.quicksort.original_data = list(self.cocktails.keys())
+            #sorted_data = self.quicksort.sort()
+            self.bubbelsort.get_original_data = list(self.cocktails.keys())
+            sorted_data = self.bubbelsort.sort()
         elif criteria == "Beliebtheit":
             sorted_data = sorted(
                 self.cocktails.keys(),
