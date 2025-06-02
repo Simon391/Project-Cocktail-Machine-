@@ -20,7 +20,7 @@ class SerialManager:
         }
         self._receive_thread = None
         self._heartbeat_thread = None
-        self.heartbeat_interval = 1.0
+        self.heartbeat_interval = 2.0
         self.enable_heartbeat = False  # 
 
     def register_handler(self, event: str, handler: Callable):

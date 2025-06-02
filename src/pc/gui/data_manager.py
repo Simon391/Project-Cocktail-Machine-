@@ -96,10 +96,8 @@ class CocktailDataManager:
     def sort_data(self, criteria="Name", order="Aufsteigend"):
         """Sort data by different criteria"""
         if criteria == "Name":
-            #self.quicksort.original_data = list(self.cocktails.keys())
-            #sorted_data = self.quicksort.sort()
-            self.bubbelsort.get_original_data = list(self.cocktails.keys())
-            sorted_data = self.bubbelsort.sort()
+            self.quicksort.original_data = list(self.cocktails.keys())
+            sorted_data = self.quicksort.sort()
         elif criteria == "Beliebtheit":
             sorted_data = sorted(
                 self.cocktails.keys(),
