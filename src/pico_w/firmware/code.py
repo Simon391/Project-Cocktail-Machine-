@@ -1,116 +1,194 @@
 import time
 import board
-from protocol import PicoSerialProtocol          # Kommunikation mit dem Host
-from pumpe import MultiPumpController            # Pumpensteuerung
+from protocol import PicoSerialProtocol
+from pumpe import MultiPumpController
+from waage import HX711
 
 class PumpenManager:
     def __init__(self):
         self.proto = PicoSerialProtocol()
 
-        # Zutat → GPIO
         pump_pins = {
-            "wasser": board.GP18,
-            "zucker": board.GP19,
-            "saft": board.GP20,
-            "sirup": board.GP21
+            "Rum": board.GP18,
+            "Vodka": board.GP19,
+            "Cola": board.GP20,
+            "Tonic Water": board.GP21
         }
 
-        # Zutat → Sekunden pro Milliliter
         ml_to_sec = {
-            "wasser": 0.4,
-            "zucker": 0.6,
-            "saft": 0.5,
-            "sirup": 0.7
+            "Rum": 0.078,
+            "Vodka": 0.077,
+            "Cola": 0.077,
+            "Tonic Water": 0.08
         }
 
         self.pump_controller = MultiPumpController(pump_pins, ml_to_sec)
 
-        self.rezept_queue = []      # Warteschlange von Rezepten (Liste von Task-Listen)
-        self.current_rezept = []    # Aktuell ausgeführtes Rezept (Liste von Tasks)
-        self.current_task = None    # Aktueller Task (Zutat + Dauer)
-        self.task_end_time = 0      # Zeitpunkt, wann aktueller Task endet
-        self.finished_sent = False  # Wurde das aktuelle Rezept abgeschlossen gemeldet
+        self.waage = HX711(board.GP2, board.GP3)
+        self.waage.set_scale(960)
+        print("Tare Waage...")
+        self.waage.tare()
+
+        self.rezept_queue = []
+        self.current_rezept = []
+        self.current_task = None
+        self.current_rezept_name = ""
+        self.finished_sent = False
+        self.rezept_start_gewicht = None
+
+    def wait_for_glas(self):
+        print("Bitte Glas aufstellen...")
+        while True:
+            gewicht = self.get_stable_weight()
+            print(f"[DEBUG] Warte auf Glas... Gewicht: {gewicht:.1f}g")
+            if gewicht >= 20:
+                self.rezept_start_gewicht = gewicht
+                print(f"[INFO] Glas erkannt mit {gewicht:.1f}g")
+                break
+            time.sleep(0.2)
+
+    def wait_for_glas_entfernt(self):
+        print("Bitte Glas entfernen...")
+        while True:
+            gewicht = self.get_stable_weight()
+            print(f"[DEBUG] Warte auf Glasentfernung... Gewicht: {gewicht:.1f}g")
+            if gewicht < 20:
+                print("[INFO] Glas entfernt")
+                break
+            time.sleep(0.2)
+
+    def get_stable_weight(self, samples=3, delay=0.01, max_jump=100.0):
+        """Lese Gewicht mehrfach, verwerfe Ausreißer über 100g Unterschied."""
+        readings = []
+        last_valid = None
+
+        for _ in range(samples * 2):
+            raw = self.waage.get_units()
+            if last_valid is None or abs(raw - last_valid) <= max_jump:
+                readings.append(raw)
+                last_valid = raw
+            else:
+                print(f"[WARNUNG] Gewichtssprung ignoriert: {raw:.1f}g (letzter gültiger: {last_valid:.1f}g)")
+            time.sleep(delay)
+            if len(readings) >= samples:
+                break
+
+        if not readings:
+            print("[WARNUNG] Keine gültigen Gewichtsdaten – Rückgabe 0.0")
+            return 0.0
+
+        readings.sort()
+        return readings[len(readings) // 2]
 
     def process_message(self, msg):
         print("Empfangen:", msg)
 
-        # Einzelpumpe (als Task)
-        if msg.get("command") == "pump":
-            task = {"ingredient": msg["ingredient"]}
-
-            if "duration" in msg:
-                task["duration"] = msg["duration"]
-            elif "menge_ml" in msg:
-                task["duration"] = self.pump_controller.ml_to_duration(msg["ingredient"], msg["menge_ml"])
-            else:
-                self.proto.send_response({"status": "error", "message": "Keine Dauer oder Menge angegeben"})
-                return
-
-            self.rezept_queue.append([task])
-            self.proto.send_response({"status": "ok", "action": "Einzelauftrag aufgenommen"})
-
-        # Rezept mit mehreren Tasks
-        elif "Rezept" in msg and "tasks" in msg:
-            rezeptname = msg.get("Rezept", "Unbenannt")
+        if msg.get("command") == "prepare" and "ingredients" in msg:
+            rezeptname = msg.get("recipe", "Unbenannt")
+            ingredients = msg["ingredients"]
             tasks = []
+            ignored = []
 
-            for task_data in msg["tasks"]:
-                ingredient = task_data["ingredient"]
-
-                if "duration" in task_data:
-                    duration = task_data["duration"]
-                elif "menge_ml" in task_data:
-                    duration = self.pump_controller.ml_to_duration(ingredient, task_data["menge_ml"])
-                else:
+            for ingredient, menge_ml in ingredients.items():
+                if ingredient not in self.pump_controller.ml_to_sec:
+                    print(f"Ignoriere unbekannte Zutat: {ingredient}")
+                    ignored.append(ingredient)
                     continue
 
+                duration = self.pump_controller.ml_to_duration(ingredient, menge_ml)
                 tasks.append({
                     "ingredient": ingredient,
-                    "duration": duration
+                    "duration": duration,
+                    "menge_ml": menge_ml
                 })
 
             if tasks:
-                self.rezept_queue.append({"name": rezeptname, "tasks": tasks})
-                self.proto.send_response({"status": "ok", "action": f"{len(tasks)} Aufgaben für Rezept '{rezeptname}' angenommen"})
-            else:
-                self.proto.send_response({"status": "error", "message": "Keine gültigen Aufgaben im Rezept"})
+                # Glas steht evtl. schon da
+                gewicht = self.get_stable_weight()
+                if gewicht >= 20:
+                    self.rezept_start_gewicht = gewicht
+                    print(f"[INFO] Glas erkannt mit {gewicht:.1f}g (frühzeitig)")
+                else:
+                    self.rezept_start_gewicht = None
 
+                self.rezept_queue.append({"name": rezeptname, "tasks": tasks})
+
+                response = {
+                    "status": "ok",
+                    "action": f"{len(tasks)} gültige Zutaten für Rezept '{rezeptname}' aufgenommen"
+                }
+                if ignored:
+                    response["ignored"] = ignored
+
+                self.proto.send_response(response)
+            else:
+                self.proto.send_response({
+                    "status": "error",
+                    "message": f"Keine gültigen Zutaten im Rezept '{rezeptname}'"
+                })
         else:
-            self.proto.send_response({"status": "error", "message": "Unbekannter Befehl"})
+            self.proto.send_response({"status": "error", "message": "Ungültiges Format oder Befehl"})
 
     def update(self):
-        now = time.monotonic()
-
-        # Neues Rezept starten, falls keines aktiv
         if not self.current_task and not self.current_rezept and self.rezept_queue:
+            if self.rezept_start_gewicht is None:
+                self.wait_for_glas()
             rezept = self.rezept_queue.pop(0)
             self.current_rezept = rezept["tasks"]
             self.current_rezept_name = rezept.get("name", "Unbekannt")
             self.finished_sent = False
 
-        # Nächsten Task aus aktuellem Rezept starten
         if self.current_task is None and self.current_rezept:
             self.current_task = self.current_rezept.pop(0)
             ingredient = self.current_task["ingredient"]
-            duration = self.current_task["duration"]
+            menge_ml = self.current_task["menge_ml"]
+            zielgewicht = self.rezept_start_gewicht + menge_ml
 
+            print(f"Starte Pumpe {ingredient} - Zielgewicht: {zielgewicht:.1f}g")
             self.pump_controller.start_pump(ingredient)
-            self.task_end_time = now + duration
-            print(f"Starte Pumpe {ingredient} für {duration:.2f} Sekunden")
 
-        # Aktuellen Task beenden
-        if self.current_task and now >= self.task_end_time:
-            self.pump_controller.stop_pump(self.current_task["ingredient"])
-            print(f"Pumpe {self.current_task['ingredient']} fertig")
+            nachlauf_puffer = 5.0
+            nachlauf_zeit = 0.1
+
+            while True:
+                aktuelles_gewicht = self.get_stable_weight()
+                print(f"[DEBUG] Gewicht: {aktuelles_gewicht:.1f}g / Ziel: {zielgewicht:.1f}g")
+
+                if aktuelles_gewicht < self.rezept_start_gewicht - 10:
+                    print("[WARNUNG] Glas wurde entfernt während Befüllung!")
+                    self.pump_controller.stop_pump(ingredient)
+                    self.proto.send_response({
+                        "status": "error",
+                        "message": f"Abbruch: Glas wurde entfernt während {ingredient}-Befüllung"
+                    })
+                    self.current_task = None
+                    self.current_rezept = []
+                    self.rezept_queue = []
+                    self.finished_sent = True
+                    self.wait_for_glas_entfernt()
+                    return
+
+                if aktuelles_gewicht >= (zielgewicht - nachlauf_puffer):
+                    print(f"Stoppe Pumpe kurz vor Ziel bei {aktuelles_gewicht:.1f}g (Ziel - Puffer: {zielgewicht - nachlauf_puffer:.1f}g)")
+                    self.pump_controller.stop_pump(ingredient)
+                    time.sleep(nachlauf_zeit)
+                    gewicht_nach_nachlauf = self.get_stable_weight()
+                    print(f"[DEBUG] Gewicht nach Nachlauf: {gewicht_nach_nachlauf:.1f}g")
+                    break
+
+                time.sleep(0.05)
+
+            print(f"Pumpe {ingredient} gestoppt bei {gewicht_nach_nachlauf:.1f}g")
+            self.rezept_start_gewicht = gewicht_nach_nachlauf
             self.current_task = None
 
-            # Rezept abgeschlossen
             if not self.current_rezept and not self.finished_sent:
                 self.proto.send_response({
                     "status": "ok",
                     "message": f"Rezept '{self.current_rezept_name}' abgeschlossen"
                 })
                 self.finished_sent = True
+                self.wait_for_glas_entfernt()
 
     def loop(self):
         print("Starte Hauptschleife...")
@@ -120,7 +198,6 @@ class PumpenManager:
                 self.process_message(msg)
             self.update()
             time.sleep(0.05)
-
 
 if __name__ == "__main__":
     manager = PumpenManager()
