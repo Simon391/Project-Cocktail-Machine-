@@ -10,7 +10,7 @@ class QuickSort:
         return self.sorted_data
     
     def _quicksort(self, arr):
-        """Rekursive Quicksort-Implementierung"""
+        #"""Rekursive Quicksort-Implementierung"""
         if len(arr) <= 1:
             return arr
         pivot = arr[len(arr) // 2].lower()
@@ -48,7 +48,7 @@ class MergeSort:
         return self._merge(left, right)
     
     def _merge(self, left, right):
-        """Führt zwei sortierte Teillisten zusammen (case-insensitive)"""
+        #"""Führt zwei sortierte Teillisten zusammen (case-insensitive)"""
         result = []
         i = j = 0
         
@@ -65,11 +65,11 @@ class MergeSort:
         return result
     
     def get_original_data(self):
-        """Gibt die ursprünglichen Daten zurück"""
+        #"""Gibt die ursprünglichen Daten zurück"""
         return self.original_data
     
     def get_sorted_data(self):
-        """Gibt die sortierten Daten zurück"""
+        #"""Gibt die sortierten Daten zurück"""
         if self.sorted_data is None:
             raise ValueError("Daten wurden noch nicht sortiert")
         return self.sorted_data
@@ -97,11 +97,11 @@ class BubbleSort:
         return self.sorted_data
     
     def get_original_data(self):
-        """Gibt die ursprünglichen, unsortierten Daten zurück"""
+        #"""Gibt die ursprünglichen, unsortierten Daten zurück"""
         return self.data
     
     def get_sorted_data(self):
-        """Gibt die sortierten Daten zurück"""
+        #Gibt die sortierten Daten zurück
         if self.sorted_data is None:
             raise ValueError("Daten wurden noch nicht sortiert")
         return self.sorted_data
@@ -112,7 +112,7 @@ class InsertionSort:
         self.sorted_data = None
     
     def sort(self):
-        """Führt den Insertion-Sort Algorithmus aus"""
+        #Führt den Insertion-Sort Algorithmus aus"""
         arr = self.original_data.copy()  # Arbeite auf einer Kopie
         
         for i in range(1, len(arr)):
@@ -131,17 +131,17 @@ class InsertionSort:
         return self.sorted_data
     
     def get_original_data(self):
-        """Gibt die ursprünglichen Daten zurück"""
+        #"""Gibt die ursprünglichen Daten zurück"""
         return self.original_data
     
     def get_sorted_data(self):
-        """Gibt die sortierten Daten zurück"""
+        #"""Gibt die sortierten Daten zurück"""
         if self.sorted_data is None:
             raise ValueError("Daten wurden noch nicht sortiert")
         return self.sorted_data
     
     def get_max_value(self):
-        """Gibt den größten Wert zurück (nach dem Sortieren)"""
+        #"""Gibt den größten Wert zurück (nach dem Sortieren)"""
         if self.sorted_data is None:
             self.sort()
         return self.sorted_data[-1] if len(self.sorted_data) > 0 else None
