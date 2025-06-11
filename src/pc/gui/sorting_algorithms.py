@@ -175,7 +175,98 @@ class BinarySearch:
 
 #Hashtable 
 
+class HashTable:
+    def __init__(self, size=20):
+        """Erstellt eine Hashtabelle mit einer festen Größe"""
+        self.size = size
+        self.table = [[] for _ in range(size)]  # Liste von Listen für Kollisionslösung
+
+    def _hash(self, key):
+        """Erzeugt einen Hash-Wert für einen gegebenen Schlüssel"""
+        return hash(key) % self.size
+
+    def insert(self, key, ingredients, notes, category):
+        """Fügt einen Cocktail zur Hashtabelle hinzu"""
+        value = {
+            "Ingredients": ingredients,
+            "Notes": notes,
+            "Category": category
+        }
+        index = self._hash(key)
+        for pair in self.table[index]:
+            if pair[0] == key:
+                pair[1] = value  # Aktualisiert vorhandenen Cocktail
+                return
+        self.table[index].append([key, value])  # Fügt neuen Cocktail hinzu
+
+    def get(self, key):
+        """Gibt die Informationen zu einem Cocktail zurück"""
+        index = self._hash(key)
+        for pair in self.table[index]:
+            if pair[0] == key:
+                return pair[1]
+        return "Cocktail nicht gefunden"
+
+    def remove(self, key):
+        """Löscht einen Cocktail aus der Hashtabelle"""
+        index = self._hash(key)
+        for i, pair in enumerate(self.table[index]):
+            if pair[0] == key:
+                del self.table[index][i]
+                return
+        return "Cocktail nicht gefunden"
+
+
+cocktail_ht = HashTable()
+
+# Cocktails direkt in die Hashtabelle einfügen
+cocktail_ht.insert("Dark & Stormy Twist", {"Rum": 50, "Cola": 100, "Tonic Water": 20, "Lime Juice": 10}, "Mit Limettenscheibe garnieren", "Classic")
+cocktail_ht.insert("Vodka Tonic Cola", {"Vodka": 40, "Tonic Water": 100, "Cola": 60, "Lemon Juice": 10}, "Eiskalt servieren", "Classic")
+cocktail_ht.insert("Rum & Vodka Fusion", {"Rum": 30, "Vodka": 30, "Cola": 80, "Tonic Water": 20}, "Mit Minzblatt garnieren", "Creative")
+cocktail_ht.insert("Cola Tonic Highball", {"Cola": 100, "Tonic Water": 50, "Rum": 40}, "Mit Zitronenscheibe garnieren", "Highball")
+cocktail_ht.insert("Vodka Cola Spritz", {"Vodka": 40, "Cola": 80, "Tonic Water": 20}, "Mit Limettenscheibe servieren", "Refreshing")
+cocktail_ht.insert("Tonic Rum Cooler", {"Rum": 50, "Tonic Water": 100}, "Eiswürfel hinzufügen", "Classic")
+cocktail_ht.insert("Cola Vodka Breeze", {"Cola": 80, "Vodka": 40, "Lemon Juice": 10}, "Mit Zitronenscheibe servieren", "Citrus")
+cocktail_ht.insert("Tonic Cola Punch", {"Tonic Water": 50, "Cola": 80, "Rum": 40, "Vodka": 30}, "Mit Orangenzeste garnieren", "Party")
+cocktail_ht.insert("Rum & Cola Classic", {"Rum": 50, "Cola": 100, "Lime Juice": 10}, "Mit Limettenscheibe servieren", "Classic")
+cocktail_ht.insert("Vodka Tonic Delight", {"Vodka": 40, "Tonic Water": 100, "Mint": 2}, "Mit Minzblatt garnieren", "Fresh")
+
+
 #Queue (First in first aus )
+
+from collections import deque
+
+class CocktailQueue:
+    def __init__(self):
+        """Erstellt eine leere Warteschlange"""
+        self.queue = deque()
+
+    def enqueue(self, name, ingredients, notes, category):
+        """Fügt einen Cocktail am Ende der Warteschlange hinzu"""
+        self.queue.append({
+            "Name": name,
+            "Ingredients": ingredients,
+            "Notes": notes,
+            "Category": category
+        })
+
+    def dequeue(self):
+        """Entfernt und gibt den ersten Cocktail in der Warteschlange zurück"""
+        if self.queue:
+            return self.queue.popleft()
+        return None  # Gibt `None` zurück, wenn die Queue leer ist
+
+    def peek(self):
+        """Zeigt den nächsten Cocktail, ohne ihn zu entfernen"""
+        if self.queue:
+            return self.queue[0]
+        return None  # Gibt `None` zurück, wenn die Queue leer ist
+
+    def get_queue(self):
+        """Gibt die gesamte Warteschlange als Liste zurück"""
+        return list(self.queue)
+
+cocktail_q = CocktailQueue()
 
 # Stack (First in last out)
 
