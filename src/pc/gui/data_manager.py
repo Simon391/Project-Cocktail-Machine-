@@ -1,5 +1,5 @@
 from sorting_algorithms import QuickSort,BubbleSort
-
+from sorting_algorithms import HashTable
 
 class CocktailDataManager:
     def __init__(self):
@@ -9,6 +9,7 @@ class CocktailDataManager:
         self.sorted_cocktails = []
         self.quicksort =  QuickSort([])
         self.bubbelsort = BubbleSort ([])
+        self.hashtable = HashTable([])
         self.load_sample_data()
         self.sort_data()
 
@@ -70,7 +71,8 @@ class CocktailDataManager:
 
         self.popularity_scores = {cocktail: 7 + index % 3 for index, cocktail in enumerate(self.cocktails.keys())}
         self.prices = {cocktail: 8 + index % 5 for index, cocktail in enumerate(self.cocktails.keys())}
-
+        # initialisierung von Dictionary in Hashtabelle
+        self.hashtable.insert(self.cocktails) 
 
     def update_popularity_scores(self, scores):
         """Update popularity scores"""
