@@ -14,7 +14,7 @@ class CocktailDataManager:
         self.sort_data()
 
     def load_sample_data(self):
-        """Load sample cocktail data with popularity scores and prices"""
+        #"""Load sample cocktail data with popularity scores and prices"""
         self.cocktails = {
             "Dark & Stormy Twist": {
                 "Ingredients": {"Rum": "50", "Cola": "100", "Tonic Water": "20", "Lime Juice": "10"},
@@ -75,17 +75,17 @@ class CocktailDataManager:
         self.hashtable.insert(self.cocktails) 
 
     def update_popularity_scores(self, scores):
-        """Update popularity scores"""
+        #"""Update popularity scores"""
         self.popularity_scores.update(scores)
         self.sort_data ()
 
     def update_prices(self, prices):
-        """Update prices"""
+        #"""Update prices"""
         self.prices.update(prices)
         self.sort_data()
 
     def add_cocktail(self, name, ingredients, notes, category="Other", popularity=5, price=10):
-        """Add new cocktail"""
+        #"""Add new cocktail"""
         self.cocktails[name] = {
             "Ingredients": ingredients,
             "Notes": notes,
@@ -96,7 +96,7 @@ class CocktailDataManager:
         self.sort_data()
 
     def sort_data(self, criteria="Name", order="Aufsteigend"):
-        """Sort data by different criteria"""
+        #"""Sort data by different criteria"""
         if criteria == "Name":
             self.quicksort.original_data = list(self.cocktails.keys())
             sorted_data = self.quicksort.sort()
@@ -124,11 +124,11 @@ class CocktailDataManager:
         return sorted_data
 
     def get_cocktail(self, name):
-        """Get specific cocktail"""
+        #"""Get specific cocktail"""
         return self.cocktails.get(name)
 
     def get_all_cocktails(self):
-        """Get all cocktails"""
+        #"""Get all cocktails"""
         return {
             name: {
                 **data,

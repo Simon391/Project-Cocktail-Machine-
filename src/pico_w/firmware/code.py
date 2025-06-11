@@ -7,7 +7,7 @@ from waage import HX711
 # Hauptklasse zur Steuerung des gesamten Systems
 class PumpenManager:
     def __init__(self):
-        # Initialisiere die serielle Kommunikation mit dem Host (z. B. PC)
+        # Initialisiere die serielle Kommunikation mit dem Host (z.B. PC)
         self.proto = PicoSerialProtocol()
 
         # Konfiguration der Pumpen und ihrer zugehörigen GPIO-Pins
@@ -26,38 +26,40 @@ class PumpenManager:
             "Tonic Water": 0.08
         }
 
-        # Initialisiere den Pumpen-Controller
+        # Initialisiere den Pumpen-Controller mit Pins und Zeiten
         self.pump_controller = MultiPumpController(pump_pins, ml_to_sec)
 
-        # Initialisiere die Waage
+        # Initialisiere die Waage mit Daten- und Clock-Pin
         self.waage = HX711(board.GP2, board.GP3)
-        self.waage.set_scale(960)
+        self.waage.set_scale(960)  # Skalierungsfaktor setzen
         print("Tare Waage...")
-        self.waage.tare()
-        
-        # Heartbeat
+        self.waage.tare()  # Waage auf Null setzen
+
+        # Konfiguration für Heartbeat
         self.last_heartbeat = time.time()
-        self.heartbeat_interval = 2.0
+        self.heartbeat_interval = 2.0  # alle 2 Sekunden
 
-        # Zustände
-        self.rezept_queue = []
-        self.current_rezept = []
-        self.current_task = None
-        self.current_rezept_name = ""
-        self.finished_sent = False
-        self.rezept_start_gewicht = None
+        # Initialzustände
+        self.rezept_queue = []         # Warteschlange der Rezepte
+        self.current_rezept = []       # Aktives Rezept
+        self.current_task = None       # Aktuelle Aufgabe/Zutat
+        self.current_rezept_name = ""  # Name des aktuellen Rezepts
+        self.finished_sent = False     # Wurde Abschlussnachricht gesendet?
+        self.rezept_start_gewicht = None  # Startgewicht beim Rezept
 
+    # Warten, bis ein Glas erkannt wird
     def wait_for_glas(self):
         print("Bitte Glas aufstellen...")
         while True:
             gewicht = self.get_stable_weight()
             print(f"[DEBUG] Warte auf Glas... Gewicht: {gewicht:.1f}g")
-            if gewicht >= 20:
+            if gewicht >= 350:
                 self.rezept_start_gewicht = gewicht
                 print(f"[INFO] Glas erkannt mit {gewicht:.1f}g")
                 break
             time.sleep(0.2)
 
+    # Warten, bis das Glas entfernt wurde
     def wait_for_glas_entfernt(self):
         print("Bitte Glas entfernen...")
         while True:
@@ -68,6 +70,7 @@ class PumpenManager:
                 break
             time.sleep(0.2)
 
+    # Liefert ein stabiles Gewicht durch Mittelwertbildung und Prüfung auf Ausreißer
     def get_stable_weight(self, samples=3, delay=0.01, max_jump=100.0):
         readings = []
         last_valid = None
@@ -88,8 +91,9 @@ class PumpenManager:
             return 0.0
 
         readings.sort()
-        return readings[len(readings) // 2]
+        return readings[len(readings) // 2]  # Median zurückgeben
 
+    # Verarbeitet eingehende Nachrichten vom Host
     def process_message(self, msg):
         print("Empfangen:", msg)
 
@@ -113,6 +117,7 @@ class PumpenManager:
                 })
 
             if tasks:
+                # Prüfe, ob Glas bereits vorhanden ist
                 gewicht = self.get_stable_weight()
                 if gewicht >= 20:
                     self.rezept_start_gewicht = gewicht
@@ -138,7 +143,9 @@ class PumpenManager:
         else:
             self.proto.send_response({"status": "error", "message": "Ungültiges Format oder Befehl"})
 
+    # Führt einen Pumpzyklus aus, wenn ein Rezept und eine Aufgabe vorhanden ist
     def update(self):
+        # Starte neues Rezept aus der Warteschlange
         if not self.current_task and not self.current_rezept and self.rezept_queue:
             if self.rezept_start_gewicht is None:
                 self.wait_for_glas()
@@ -148,6 +155,7 @@ class PumpenManager:
             self.current_rezept_name = rezept.get("name", "Unbekannt")
             self.finished_sent = False
 
+        # Starte nächsten Pumpvorgang
         if self.current_task is None and self.current_rezept:
             self.current_task = self.current_rezept.pop(0)
             ingredient = self.current_task["ingredient"]
@@ -157,13 +165,14 @@ class PumpenManager:
             print(f"Starte Pumpe {ingredient} - Zielgewicht: {zielgewicht:.1f}g")
             self.pump_controller.start_pump(ingredient)
 
-            nachlauf_puffer = 5.0
-            nachlauf_zeit = 0.1
+            nachlauf_puffer = 10.0  # Sicherheitsbereich, um Nachlauf zu berücksichtigen
+            nachlauf_zeit = 0.1   # kurze Wartezeit für Nachlauf
 
             while True:
                 aktuelles_gewicht = self.get_stable_weight()
                 print(f"[DEBUG] Gewicht: {aktuelles_gewicht:.1f}g / Ziel: {zielgewicht:.1f}g")
 
+                # Abbruch, wenn Glas entfernt wurde
                 if aktuelles_gewicht < self.rezept_start_gewicht - 10:
                     print("[WARNUNG] Glas wurde entfernt während Befüllung!")
                     self.pump_controller.stop_pump(ingredient)
@@ -178,6 +187,7 @@ class PumpenManager:
                     self.wait_for_glas_entfernt()
                     return
 
+                # Stoppe Pumpe kurz vor Ziel, um Nachlauf zu vermeiden
                 if aktuelles_gewicht >= (zielgewicht - nachlauf_puffer):
                     print(f"Stoppe Pumpe kurz vor Ziel bei {aktuelles_gewicht:.1f}g (Ziel - Puffer: {zielgewicht - nachlauf_puffer:.1f}g)")
                     self.pump_controller.stop_pump(ingredient)
@@ -192,6 +202,7 @@ class PumpenManager:
             self.rezept_start_gewicht = gewicht_nach_nachlauf
             self.current_task = None
 
+            # Rezept abgeschlossen
             if not self.current_rezept and not self.finished_sent:
                 self.proto.send_response({
                     "status": "ok",
@@ -200,6 +211,7 @@ class PumpenManager:
                 self.finished_sent = True
                 self.wait_for_glas_entfernt()
 
+    # Sendet regelmäßig ein Heartbeat-Signal an den Host
     def send_heartbeat(self):
         now = time.time()
         if now - self.last_heartbeat >= self.heartbeat_interval:
@@ -209,6 +221,7 @@ class PumpenManager:
             })
             self.last_heartbeat = now
 
+    # Hauptschleife: empfängt Nachrichten, aktualisiert Status, sendet Heartbeat
     def loop(self):
         print("Starte Hauptschleife...")
         while True:
@@ -220,7 +233,7 @@ class PumpenManager:
             time.sleep(0.05)
 
 
-# Starte das System, wenn direkt ausgeführt
+# Starte das System, wenn das Skript direkt ausgeführt wird
 if __name__ == "__main__":
     manager = PumpenManager()
     manager.loop()
