@@ -169,7 +169,7 @@ class MainPage(ttk.Frame):
                     style="Medium.TLabel", font=("Segoe UI", 11, "bold")).pack(side="left")
             
             # Get price from the data_manager's prices dictionary
-            price = self.data_manager.prices.get(name, "N/A")
+            price = self.data_manager.cocktails.get(name, {}).get("Price", "N/A")
             ttk.Label(price_frame, text=f"{price} €", 
                     style="Medium.TLabel").pack(side="left")
             
