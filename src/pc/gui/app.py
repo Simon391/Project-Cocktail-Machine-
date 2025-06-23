@@ -225,10 +225,7 @@ class SettingsPage(ttk.Frame):
         super().__init__(parent)
         self.toggle_theme_callback = toggle_theme_callback
         self.serial_manager = serial_manager
-
-
         ttk.Label(self, text="⚙️ Einstellungen", font=("Segoe UI", 16)).pack(pady=20)
-
         self.theme_var = tk.BooleanVar()
         ttk.Checkbutton(
             self,
@@ -326,7 +323,7 @@ class App(ttk.Frame):
             frame = ttk.Frame(sidebar)
             frame.pack(fill="x", pady=10)
             label = ttk.Label(frame, image=icon, cursor="hand2")
-            label.image = icon  # Keep a reference
+            label.image = icon  
             label.pack()
             label.bind("<Button-1>", lambda e, name=name: self.show_page(name))
 
@@ -335,7 +332,6 @@ class App(ttk.Frame):
         container.grid(row=0, column=1, sticky="nsew")
         container.rowconfigure(0, weight=1)
         container.columnconfigure(0, weight=1)
-
         self.serial_manager = SerialManager() 
 
         self.pages = {
