@@ -7,6 +7,7 @@ from waage import HX711
 # Hauptklasse zur Steuerung des gesamten Systems
 class PumpenManager:
     def __init__(self):
+        
         # Initialisiere die serielle Kommunikation mit dem Host (z.B. PC)
         self.proto = PicoSerialProtocol()
 
@@ -65,11 +66,11 @@ class PumpenManager:
         while True:
             gewicht = self.get_stable_weight()
             print(f"[DEBUG] Warte auf Glasentfernung... Gewicht: {gewicht:.1f}g")
-            if gewicht < 20:
+            if gewicht < 350:
                 print("[INFO] Glas entfernt")
                 break
             time.sleep(0.2)
-
+            
     # Liefert ein stabiles Gewicht durch Mittelwertbildung und Prüfung auf Ausreißer
     def get_stable_weight(self, samples=3, delay=0.01, max_jump=100.0):
         readings = []
@@ -119,7 +120,7 @@ class PumpenManager:
             if tasks:
                 # Prüfe, ob Glas bereits vorhanden ist
                 gewicht = self.get_stable_weight()
-                if gewicht >= 20:
+                if gewicht >= 350:
                     self.rezept_start_gewicht = gewicht
                     print(f"[INFO] Glas erkannt mit {gewicht:.1f}g (frühzeitig)")
                 else:
