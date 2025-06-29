@@ -105,7 +105,9 @@ class SerialManager:
 
     def _heartbeat_loop(self):
         while self.running:
-            self.send_message("HEARTBEAT")
+            self.send_message({
+                "status": "heartbeat"
+            })
             time.sleep(self.heartbeat_interval)
 
     @staticmethod
