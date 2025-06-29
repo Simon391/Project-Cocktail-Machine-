@@ -51,6 +51,80 @@ class BinarySearch:
                 right = mid - 1
         return -1
 
+class InsertionSort:
+    def __init__(self, data):
+        self.original_data = data.copy()
+        self.sorted_data = None
+
+    def sort(self):
+        arr = self.original_data.copy()
+        for i in range(1, len(arr)):
+            key = arr[i]
+            j = i - 1
+            while j >= 0 and arr[j] > key:
+                arr[j + 1] = arr[j]
+                j -= 1
+            arr[j + 1] = key
+        self.sorted_data = arr
+        return self.sorted_data
+
+    def get_original_data(self):
+        return self.original_data
+
+    def get_sorted_data(self):
+        if self.sorted_data is None:
+            raise ValueError("Daten wurden noch nicht sortiert")
+        return self.sorted_data
+
+    def get_max_value(self):
+        if self.sorted_data is None:
+            self.sort()
+        return self.sorted_data[-1] if len(self.sorted_data) > 0 else None
+
+class MergeSort:
+    def __init__(self, data):
+        self.original_data = data.copy()
+        self.sorted_data = None
+
+    def sort(self):
+        self.sorted_data = self._merge_sort(self.original_data.copy())
+        return self.sorted_data
+
+    def _merge_sort(self, arr):
+        if len(arr) <= 1:
+            return arr
+
+        mid = len(arr) // 2
+        left = self._merge_sort(arr[:mid])
+        right = self._merge_sort(arr[mid:])
+
+        return self._merge(left, right)
+
+    def _merge(self, left, right):
+        result = []
+        i = j = 0
+
+        while i < len(left) and j < len(right):
+            if str(left[i]).lower() <= str(right[j]).lower():
+                result.append(left[i])
+                i += 1
+            else:
+                result.append(right[j])
+                j += 1
+
+        result.extend(left[i:])
+        result.extend(right[j:])
+        return result
+
+    def get_original_data(self):
+        return self.original_data
+
+    def get_sorted_data(self):
+        if self.sorted_data is None:
+            raise ValueError('Daten wurden noch nicht sortiert')
+        return self.sorted_data
+
+
 class HashTable:
     def __init__(self, size=20):  # Standardgröße von 20
         """Erstellt eine Hashtabelle mit einer festen Größe"""
